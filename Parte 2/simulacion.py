@@ -1,7 +1,5 @@
 #bibliotecas importadas
-import heapq
 import random
-import time 
 import matplotlib.pyplot as plt
 import simpy
 
@@ -13,17 +11,17 @@ random.seed(10)
 class Paciente:
     #Constructor
     #Constructor del paciente.
-    def _Paciente_(Paciente, Nombre, Severidad):
+    def __init__(Paciente, Nombre, Severidad):
         Paciente.Nombre = Nombre
         Paciente.Severidad = Severidad
 
     #Metodos
     #Metodo para evaluar la severidad.
-    def _Urgencia_(Paciente, severidad_menor):
+    def __lt__(Paciente, severidad_menor):
         return Paciente.Severidad <= severidad_menor.Severidad
     
     #Metodo para comparar la severidad de varios pacientes y ordenarlos.
-    def _Orden_urgencia_(Paciente):
+    def __str__(Paciente):
         return f"{Paciente.Nombre}, Severidad {Paciente.Severidad}"
     
 #Listas de almacenamiento de tiempos de espera en las tres etapas
@@ -36,10 +34,10 @@ Tiempo_rayosX = []
 def Hospital(ambiente):
     
     #Definicion de recursos del hospital
-    enfermera = simpy.Resource(ambiente, cantidad = 2)
-    doctorGeneral = simpy.PriorityResource(ambiente, cantidad = 2)
-    doctorEspecial = simpy.PriorityResource(ambiente, cantidad = 1)
-    rayosX = simpy.PriorityResource(ambiente, cantidad = 2)
+    enfermera = simpy.Resource(ambiente, capacity = 2)
+    doctorGeneral = simpy.PriorityResource(ambiente, capacity = 2)
+    doctorEspecial = simpy.PriorityResource(ambiente, capacity = 1)
+    rayosX = simpy.PriorityResource(ambiente, capacity = 2)
 
     #Pacientes que se debe atender
     pacientes = ["Arturo", "Jimena", "Luis", "Carlo", "Arodi"]
@@ -50,11 +48,11 @@ def Hospital(ambiente):
         #Eleccion aleatoria de la severidad del paciente
         Severidad = random.randint(1, 5)
         #Recopila los datos generados anteriormente y los guarda
-        Paciente = Paciente(Nombre, Severidad)
-        ambiente.process(paciente_procesado(ambiente, Paciente, enfermera, doctorGeneral, doctorEspecial, rayosX))
+        paciente = Paciente(Nombre, Severidad)
+        ambiente.process(paciente_procesado(ambiente, paciente, enfermera, doctorGeneral, doctorEspecial, rayosX))
         #Tiempo de llegada de los pacientes
-        yield ambiente.timeout(5)
-    
+        yield ambiente.timeout(3)
+
 #Funcion de simulacion de los procesos de un paciente en urgencias
 def paciente_procesado(entrada, paciente, enfermera, doctorGeneral, doctorEspecial, rayosX):
 
@@ -65,7 +63,7 @@ def paciente_procesado(entrada, paciente, enfermera, doctorGeneral, doctorEspeci
         yield solicitud
         Sala_espera = entrada.now - ingreso_paciente
         #Llevan al paciente para clasificar su severidad y agregarloa la lista.
-        Clasificacion_severidad.append(max(Sala_espera, 0.3))
+        Clasificacion_severidad.append(max(Sala_espera, 0.1))
         print(f"{entrada.now}: {paciente} ingreso del paciente a la sala de urgencias")
         #Tiempo de tardanza de evaluacion del paciente.
         yield entrada.timeout(5)
@@ -76,7 +74,7 @@ def paciente_procesado(entrada, paciente, enfermera, doctorGeneral, doctorEspeci
     #Si es en una escala de 1 y 2, se considera como urgente y lo atiende un especialista.
     #Si es una escala de 3 a 5, se considera como no tan urgente y lo atiende un doctor general.
     if paciente.Severidad <= 2:
-        with doctorEspecial.request(prioridad = paciente.Severidad) as solicitud:
+        with doctorEspecial.request(priority = paciente.Severidad) as solicitud:
             #Espera para el doctor especialista.
             yield solicitud
             Sala_espera = entrada.now - ingreso_doctor
@@ -86,7 +84,7 @@ def paciente_procesado(entrada, paciente, enfermera, doctorGeneral, doctorEspeci
             #Tiempo que se tardo la revision por el doctor especialista.
             yield entrada.timeout(10)
     else:
-        with doctorGeneral.request(prioridad = paciente.Severidad) as solicitud:
+        with doctorGeneral.request(priority = paciente.Severidad) as solicitud:
             #Espera para el doctor general.
             yield solicitud
             Sala_espera = entrada.now - ingreso_doctor
@@ -98,7 +96,7 @@ def paciente_procesado(entrada, paciente, enfermera, doctorGeneral, doctorEspeci
     
     #Si es necesario, el paciente pasa por rayos X.
     ingreso_rayosX = entrada.now
-    with rayosX.request(prioridad = paciente.Severidad) as solicitud:
+    with rayosX.request(priority = paciente.Severidad) as solicitud:
         #Espera para los rayos X.
         yield solicitud
         Sala_espera = entrada.now - ingreso_rayosX
@@ -106,11 +104,11 @@ def paciente_procesado(entrada, paciente, enfermera, doctorGeneral, doctorEspeci
         Tiempo_rayosX.append(Sala_espera)
         print(f"{entrada.now}: {paciente} se encuentra en la maquina de rayos X")
         #Tiempo que se tarda el paciente en pasar por los rayos X.
-        yield entrada.timeout(20)
+        yield entrada.timeout(15)
     print(f"{entrada.now}: {paciente} fue terminado de atender")
 
 #Creacion del ambiente de simulacion
-if _nombre_ =="_Main_":
+if __name__ == "__main__":
     #inico del ambiente de simulacion
     Ambiente = simpy.Environment()
     Ambiente.process(Hospital(Ambiente))
