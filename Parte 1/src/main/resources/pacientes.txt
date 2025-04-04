@@ -1,0 +1,10 @@
+Juan Pérez, Dolor abdominal, C
+María Gómez, Fractura en brazo, B
+Luis Hernández, Dolor de cabeza, E
+Ana Castillo, Dificultad para respirar, A
+Carlos Ruiz, Cortadura profunda, B
+Elena Torres, Mareo leve, D
+Pedro Soto, Pérdida de conocimiento, A
+Laura Méndez, Náuseas, D
+Andrés Ramos, Dolor en el pecho, A
+Rosa Morales, Herida sangrante, B

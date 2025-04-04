@@ -1,4 +1,6 @@
-class Paciente implements Comparable<Paciente> {
+package src.main.java.com.estructuradatos.parte1;
+
+public class Paciente implements Comparable<Paciente> {
     private String nombre;
     private String sintoma;
     private char prioridad; //variable que identificará la prioridad del mismo
